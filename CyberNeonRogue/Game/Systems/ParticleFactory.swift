@@ -1,4 +1,5 @@
 import SpriteKit
+import UIKit
 
 /// Factory for generating high-performance neon particles, explosions, trails, and ambient starfields
 public final class ParticleFactory {

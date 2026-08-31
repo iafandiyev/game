@@ -16,28 +16,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Select Latest Xcode
+      - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           xcodebuild -version
 
-      - name: Build and Archive iOS App (Unsigned for Sideloadly)
+      - name: Build iOS App (.app)
         run: |
-          xcodebuild clean archive \
+          set -o pipefail
+          xcodebuild clean build \
             -project CyberNeonRogue.xcodeproj \
             -scheme CyberNeonRogue \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath build/CyberNeonRogue.xcarchive \
+            -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
+            CONFIGURATION_BUILD_DIR=build/Release-iphoneos
 
-      - name: Package App into .ipa (Payload Archive)
+      - name: Package into .ipa (Payload Archive)
         run: |
           mkdir -p build/Payload
-          cp -R build/CyberNeonRogue.xcarchive/Products/Applications/CyberNeonRogue.app build/Payload/
+          cp -R build/Release-iphoneos/CyberNeonRogue.app build/Payload/
           cd build
           zip -r9 CyberNeonRogue.ipa Payload
           cd ..
@@ -59,13 +60,6 @@ jobs:
           body: |
             ## 🚀 CyberNeon: Quantum Rogue - iOS IPA Sideloadly Paketi
             
-            Bu `.ipa` faylı **Sideloadly** və ya digər sideload proqramları (AltStore, TrollStore, Scarlet) vasitəsilə birbaşa iPhone-a yüklənmək üçün hazırdır.
-            
-            ### Quraşdırma:
-            1. `CyberNeonRogue.ipa` faylını yükləyin.
-            2. **Sideloadly** proqramını kompüterinizdə açın.
-            3. iPhone-u USB kabel ilə kompüterə qoşun.
-            4. `.ipa` faylını Sideloadly-yə sürükləyin və Apple ID-nizi daxil edib **Start** düyməsinə basın.
-            5. iPhone-da `Tənzimləmələr -> Ümumi -> VPN və Cihaz İdarəetməsi` bölməsinə daxil olub sertifikata **Etibar et (Trust)** vurun və oyunu açın!
+            Bu `.ipa` faylı **Sideloadly** və ya digər sideload proqramları vasitəsilə birbaşa iPhone-a yüklənmək üçün hazırdır.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
