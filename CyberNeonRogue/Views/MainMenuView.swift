@@ -72,20 +72,33 @@ public struct MainMenuView: View {
                 
                 Spacer()
                 
-                // Pulsing Cyber Neon Logo
-                VStack(spacing: 4) {
-                    Text("CYBER NEON")
-                        .font(.system(size: 38, weight: .black, design: .monospaced))
-                        .foregroundColor(gameState.selectedTheme.primaryColor)
-                        .shadow(color: gameState.selectedTheme.primaryColor, radius: pulseLogo ? 20 : 8)
+                // Pulsing Cyber Neon Logo & Emblem
+                VStack(spacing: 14) {
+                    Image("GameLogo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 125, height: 125)
+                        .cornerRadius(28)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 28)
+                                .stroke(gameState.selectedTheme.primaryColor, lineWidth: 2)
+                        )
+                        .shadow(color: gameState.selectedTheme.primaryColor.opacity(0.7), radius: pulseLogo ? 20 : 8)
+                        .scaleEffect(pulseLogo ? 1.03 : 0.98)
                     
-                    Text("QUANTUM ROGUE")
-                        .font(.system(size: 20, weight: .heavy, design: .monospaced))
-                        .foregroundColor(gameState.selectedTheme.secondaryColor)
-                        .tracking(4)
-                        .shadow(color: gameState.selectedTheme.secondaryColor, radius: 10)
+                    VStack(spacing: 3) {
+                        Text("CYBER NEON")
+                            .font(.system(size: 32, weight: .black, design: .monospaced))
+                            .foregroundColor(gameState.selectedTheme.primaryColor)
+                            .shadow(color: gameState.selectedTheme.primaryColor, radius: pulseLogo ? 16 : 6)
+                        
+                        Text("QUANTUM ROGUE")
+                            .font(.system(size: 16, weight: .heavy, design: .monospaced))
+                            .foregroundColor(gameState.selectedTheme.secondaryColor)
+                            .tracking(4)
+                            .shadow(color: gameState.selectedTheme.secondaryColor, radius: 8)
+                    }
                 }
-                .scaleEffect(pulseLogo ? 1.03 : 0.98)
                 .onAppear {
                     withAnimation(Animation.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
                         pulseLogo = true
