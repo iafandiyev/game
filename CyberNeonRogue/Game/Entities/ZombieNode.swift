@@ -1,7 +1,7 @@
 import SpriteKit
 import UIKit
 
-public enum ZombieType {
+public enum ZombieType: Equatable {
     case walker
     case runner
     case acidSpitter
@@ -17,6 +17,15 @@ public final class ZombieNode: SKNode {
     public var damage: CGFloat
     public var cashValue: Int
     public var isBoss: Bool = false
+    
+    public var isAcidSpitter: Bool {
+        if case .acidSpitter = zombieType { return true }
+        return false
+    }
+    public var isBoomer: Bool {
+        if case .boomer = zombieType { return true }
+        return false
+    }
     
     // Status Effects
     public var burnTimer: TimeInterval = 0

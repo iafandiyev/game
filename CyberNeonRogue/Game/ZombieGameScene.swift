@@ -530,7 +530,7 @@ public final class ZombieGameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         // Blood Spray VFX
-        let isAcid = (zombie.zombieType == .acidSpitter)
+        let isAcid = zombie.isAcidSpitter
         let bloodSpray = BloodDecalFactory.createBloodSpray(at: contactPoint, angle: bullet.zRotation, isAcid: isAcid)
         vfxLayer.addChild(bloodSpray)
         
@@ -555,7 +555,7 @@ public final class ZombieGameScene: SKScene, SKPhysicsContactDelegate {
         AudioManager.shared.playZombieDeath()
         
         // Floor blood decal
-        let isAcid = (zombie.zombieType == .acidSpitter)
+        let isAcid = zombie.isAcidSpitter
         let bloodDecal = BloodDecalFactory.createBloodDecal(at: zombie.position, isGreenAcid: isAcid)
         floorLayer.addChild(bloodDecal)
         
