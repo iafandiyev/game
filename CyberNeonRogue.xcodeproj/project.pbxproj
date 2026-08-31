@@ -10,22 +10,21 @@
 		AA0100012C84000100000001 /* CyberNeonRogueApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100012C84000100000001 /* CyberNeonRogueApp.swift */; };
 		AA0100022C84000100000002 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100022C84000100000002 /* AudioManager.swift */; };
 		AA0100032C84000100000003 /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100032C84000100000003 /* HapticsManager.swift */; };
-		AA0100042C84000100000004 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100042C84000100000004 /* GameScene.swift */; };
-		AA0100052C84000100000005 /* PlayerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100052C84000100000005 /* PlayerNode.swift */; };
-		AA0100062C84000100000006 /* EnemyNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100062C84000100000006 /* EnemyNode.swift */; };
-		AA0100072C84000100000007 /* BulletNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100072C84000100000007 /* BulletNode.swift */; };
-		AA0100082C84000100000008 /* PowerUpNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100082C84000100000008 /* PowerUpNode.swift */; };
-		AA0100092C84000100000009 /* UpgradeSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100092C84000100000009 /* UpgradeSystem.swift */; };
-		AA01000A2C8400010000000A /* ParticleFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000A2C8400010000000A /* ParticleFactory.swift */; };
-		AA01000B2C8400010000000B /* WaveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000B2C8400010000000B /* WaveManager.swift */; };
-		AA01000C2C8400010000000C /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000C2C8400010000000C /* GameState.swift */; };
+		AA0100042C84000100000004 /* ZombieGameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100042C84000100000004 /* ZombieGameScene.swift */; };
+		AA0100052C84000100000005 /* SurvivorHeroNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100052C84000100000005 /* SurvivorHeroNode.swift */; };
+		AA0100062C84000100000006 /* ZombieNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100062C84000100000006 /* ZombieNode.swift */; };
+		AA0100072C84000100000007 /* ProjectileNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100072C84000100000007 /* ProjectileNode.swift */; };
+		AA0100082C84000100000008 /* DropItemNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100082C84000100000008 /* DropItemNode.swift */; };
+		AA0100092C84000100000009 /* WeaponArsenal.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100092C84000100000009 /* WeaponArsenal.swift */; };
+		AA01000A2C8400010000000A /* BloodDecalFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000A2C8400010000000A /* BloodDecalFactory.swift */; };
+		AA01000B2C8400010000000B /* ZombieWaveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000B2C8400010000000B /* ZombieWaveManager.swift */; };
+		AA01000C2C8400010000000C /* ZombieGameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000C2C8400010000000C /* ZombieGameState.swift */; };
 		AA01000D2C8400010000000D /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000D2C8400010000000D /* PersistenceManager.swift */; };
-		AA01000E2C8400010000000E /* MainMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000E2C8400010000000E /* MainMenuView.swift */; };
-		AA01000F2C8400010000000F /* GameContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000F2C8400010000000F /* GameContainerView.swift */; };
-		AA0100102C84000100000010 /* UpgradeModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100102C84000100000010 /* UpgradeModalView.swift */; };
-		AA0100112C84000100000011 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100112C84000100000011 /* ShopView.swift */; };
-		AA0100122C84000100000012 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100122C84000100000012 /* SettingsView.swift */; };
-		AA0100132C84000100000013 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100132C84000100000013 /* GameOverView.swift */; };
+		AA01000E2C8400010000000E /* ZombieMainMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000E2C8400010000000E /* ZombieMainMenuView.swift */; };
+		AA01000F2C8400010000000F /* ZombieGameHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01000F2C8400010000000F /* ZombieGameHUDView.swift */; };
+		AA0100112C84000100000011 /* ArmoryShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100112C84000100000011 /* ArmoryShopView.swift */; };
+		AA0100122C84000100000012 /* ZombieSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100122C84000100000012 /* ZombieSettingsView.swift */; };
+		AA0100132C84000100000013 /* ZombieGameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100132C84000100000013 /* ZombieGameOverView.swift */; };
 		AA0100142C84000100000014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB0100142C84000100000014 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -35,22 +34,21 @@
 		BB0100002C84000100000000 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BB0100022C84000100000002 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
 		BB0100032C84000100000003 /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsManager.swift; sourceTree = "<group>"; };
-		BB0100042C84000100000004 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
-		BB0100052C84000100000005 /* PlayerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerNode.swift; sourceTree = "<group>"; };
-		BB0100062C84000100000006 /* EnemyNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyNode.swift; sourceTree = "<group>"; };
-		BB0100072C84000100000007 /* BulletNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletNode.swift; sourceTree = "<group>"; };
-		BB0100082C84000100000008 /* PowerUpNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerUpNode.swift; sourceTree = "<group>"; };
-		BB0100092C84000100000009 /* UpgradeSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeSystem.swift; sourceTree = "<group>"; };
-		BB01000A2C8400010000000A /* ParticleFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleFactory.swift; sourceTree = "<group>"; };
-		BB01000B2C8400010000000B /* WaveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveManager.swift; sourceTree = "<group>"; };
-		BB01000C2C8400010000000C /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
+		BB0100042C84000100000004 /* ZombieGameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieGameScene.swift; sourceTree = "<group>"; };
+		BB0100052C84000100000005 /* SurvivorHeroNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurvivorHeroNode.swift; sourceTree = "<group>"; };
+		BB0100062C84000100000006 /* ZombieNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieNode.swift; sourceTree = "<group>"; };
+		BB0100072C84000100000007 /* ProjectileNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectileNode.swift; sourceTree = "<group>"; };
+		BB0100082C84000100000008 /* DropItemNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropItemNode.swift; sourceTree = "<group>"; };
+		BB0100092C84000100000009 /* WeaponArsenal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponArsenal.swift; sourceTree = "<group>"; };
+		BB01000A2C8400010000000A /* BloodDecalFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloodDecalFactory.swift; sourceTree = "<group>"; };
+		BB01000B2C8400010000000B /* ZombieWaveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieWaveManager.swift; sourceTree = "<group>"; };
+		BB01000C2C8400010000000C /* ZombieGameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieGameState.swift; sourceTree = "<group>"; };
 		BB01000D2C8400010000000D /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
-		BB01000E2C8400010000000E /* MainMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuView.swift; sourceTree = "<group>"; };
-		BB01000F2C8400010000000F /* GameContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameContainerView.swift; sourceTree = "<group>"; };
-		BB0100102C84000100000010 /* UpgradeModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeModalView.swift; sourceTree = "<group>"; };
-		BB0100112C84000100000011 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
-		BB0100122C84000100000012 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		BB0100132C84000100000013 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
+		BB01000E2C8400010000000E /* ZombieMainMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieMainMenuView.swift; sourceTree = "<group>"; };
+		BB01000F2C8400010000000F /* ZombieGameHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieGameHUDView.swift; sourceTree = "<group>"; };
+		BB0100112C84000100000011 /* ArmoryShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArmoryShopView.swift; sourceTree = "<group>"; };
+		BB0100122C84000100000012 /* ZombieSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieSettingsView.swift; sourceTree = "<group>"; };
+		BB0100132C84000100000013 /* ZombieGameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZombieGameOverView.swift; sourceTree = "<group>"; };
 		BB0100142C84000100000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,7 +105,7 @@
 		EE0100052C84000100000005 /* Game */ = {
 			isa = PBXGroup;
 			children = (
-				BB0100042C84000100000004 /* GameScene.swift */,
+				BB0100042C84000100000004 /* ZombieGameScene.swift */,
 				EE0100092C84000100000009 /* Entities */,
 				EE01000A2C8400010000000A /* Systems */,
 			);
@@ -117,10 +115,10 @@
 		EE0100092C84000100000009 /* Entities */ = {
 			isa = PBXGroup;
 			children = (
-				BB0100052C84000100000005 /* PlayerNode.swift */,
-				BB0100062C84000100000006 /* EnemyNode.swift */,
-				BB0100072C84000100000007 /* BulletNode.swift */,
-				BB0100082C84000100000008 /* PowerUpNode.swift */,
+				BB0100052C84000100000005 /* SurvivorHeroNode.swift */,
+				BB0100062C84000100000006 /* ZombieNode.swift */,
+				BB0100072C84000100000007 /* ProjectileNode.swift */,
+				BB0100082C84000100000008 /* DropItemNode.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -128,9 +126,9 @@
 		EE01000A2C8400010000000A /* Systems */ = {
 			isa = PBXGroup;
 			children = (
-				BB0100092C84000100000009 /* UpgradeSystem.swift */,
-				BB01000A2C8400010000000A /* ParticleFactory.swift */,
-				BB01000B2C8400010000000B /* WaveManager.swift */,
+				BB0100092C84000100000009 /* WeaponArsenal.swift */,
+				BB01000A2C8400010000000A /* BloodDecalFactory.swift */,
+				BB01000B2C8400010000000B /* ZombieWaveManager.swift */,
 			);
 			path = Systems;
 			sourceTree = "<group>";
@@ -138,7 +136,7 @@
 		EE0100062C84000100000006 /* State */ = {
 			isa = PBXGroup;
 			children = (
-				BB01000C2C8400010000000C /* GameState.swift */,
+				BB01000C2C8400010000000C /* ZombieGameState.swift */,
 				BB01000D2C8400010000000D /* PersistenceManager.swift */,
 			);
 			path = State;
@@ -147,12 +145,11 @@
 		EE0100082C84000100000008 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				BB01000E2C8400010000000E /* MainMenuView.swift */,
-				BB01000F2C8400010000000F /* GameContainerView.swift */,
-				BB0100102C84000100000010 /* UpgradeModalView.swift */,
-				BB0100112C84000100000011 /* ShopView.swift */,
-				BB0100122C84000100000012 /* SettingsView.swift */,
-				BB0100132C84000100000013 /* GameOverView.swift */,
+				BB01000E2C8400010000000E /* ZombieMainMenuView.swift */,
+				BB01000F2C8400010000000F /* ZombieGameHUDView.swift */,
+				BB0100112C84000100000011 /* ArmoryShopView.swift */,
+				BB0100122C84000100000012 /* ZombieSettingsView.swift */,
+				BB0100132C84000100000013 /* ZombieGameOverView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -237,22 +234,21 @@
 				AA0100012C84000100000001 /* CyberNeonRogueApp.swift in Sources */,
 				AA0100022C84000100000002 /* AudioManager.swift in Sources */,
 				AA0100032C84000100000003 /* HapticsManager.swift in Sources */,
-				AA0100042C84000100000004 /* GameScene.swift in Sources */,
-				AA0100052C84000100000005 /* PlayerNode.swift in Sources */,
-				AA0100062C84000100000006 /* EnemyNode.swift in Sources */,
-				AA0100072C84000100000007 /* BulletNode.swift in Sources */,
-				AA0100082C84000100000008 /* PowerUpNode.swift in Sources */,
-				AA0100092C84000100000009 /* UpgradeSystem.swift in Sources */,
-				AA01000A2C8400010000000A /* ParticleFactory.swift in Sources */,
-				AA01000B2C8400010000000B /* WaveManager.swift in Sources */,
-				AA01000C2C8400010000000C /* GameState.swift in Sources */,
+				AA0100042C84000100000004 /* ZombieGameScene.swift in Sources */,
+				AA0100052C84000100000005 /* SurvivorHeroNode.swift in Sources */,
+				AA0100062C84000100000006 /* ZombieNode.swift in Sources */,
+				AA0100072C84000100000007 /* ProjectileNode.swift in Sources */,
+				AA0100082C84000100000008 /* DropItemNode.swift in Sources */,
+				AA0100092C84000100000009 /* WeaponArsenal.swift in Sources */,
+				AA01000A2C8400010000000A /* BloodDecalFactory.swift in Sources */,
+				AA01000B2C8400010000000B /* ZombieWaveManager.swift in Sources */,
+				AA01000C2C8400010000000C /* ZombieGameState.swift in Sources */,
 				AA01000D2C8400010000000D /* PersistenceManager.swift in Sources */,
-				AA01000E2C8400010000000E /* MainMenuView.swift in Sources */,
-				AA01000F2C8400010000000F /* GameContainerView.swift in Sources */,
-				AA0100102C84000100000010 /* UpgradeModalView.swift in Sources */,
-				AA0100112C84000100000011 /* ShopView.swift in Sources */,
-				AA0100122C84000100000012 /* SettingsView.swift in Sources */,
-				AA0100132C84000100000013 /* GameOverView.swift in Sources */,
+				AA01000E2C8400010000000E /* ZombieMainMenuView.swift in Sources */,
+				AA01000F2C8400010000000F /* ZombieGameHUDView.swift in Sources */,
+				AA0100112C84000100000011 /* ArmoryShopView.swift in Sources */,
+				AA0100122C84000100000012 /* ZombieSettingsView.swift in Sources */,
+				AA0100132C84000100000013 /* ZombieGameOverView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,19 +380,19 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CyberNeonRogue/App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Cyber Neon";
+				INFOPLIST_KEY_CFBundleDisplayName = "DeadZone";
 				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cyberneon.rogue;
+				PRODUCT_BUNDLE_IDENTIFIER = com.deadzone.survivor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -415,19 +411,19 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CyberNeonRogue/App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Cyber Neon";
+				INFOPLIST_KEY_CFBundleDisplayName = "DeadZone";
 				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cyberneon.rogue;
+				PRODUCT_BUNDLE_IDENTIFIER = com.deadzone.survivor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

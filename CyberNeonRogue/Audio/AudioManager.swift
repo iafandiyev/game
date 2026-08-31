@@ -2,13 +2,12 @@ import Foundation
 import AVFoundation
 import UIKit
 
-/// High-reliability procedural audio synthesizer using AVAudioPlayer and in-memory PCM buffers
+/// High-reliability procedural audio synthesizer for Zombie Survival guns, reloads, screams and explosions
 public final class AudioManager: ObservableObject {
     public static let shared = AudioManager()
     
-    // Volume controls
     public var soundEnabled: Bool = true
-    public var sfxVolume: Float = 0.8
+    public var sfxVolume: Float = 0.85
     public var musicVolume: Float = 0.6
     
     private var activePlayers: [AVAudioPlayer] = []
@@ -24,7 +23,7 @@ public final class AudioManager: ObservableObject {
             try session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
         } catch {
-            print("Audio session setup failed: \(error.localizedDescription)")
+            print("Audio session setup error: \(error)")
         }
     }
     
@@ -48,109 +47,213 @@ public final class AudioManager: ObservableObject {
                 player.play()
                 
                 self.activePlayers.append(player)
-                if self.activePlayers.count > 20 {
+                if self.activePlayers.count > 25 {
                     self.activePlayers.removeAll(where: { !$0.isPlaying })
                 }
             } catch {
-                print("Sound playback error: \(error)")
+                print("Playback error: \(error)")
             }
         }
     }
     
-    // MARK: - SFX Triggers
+    // MARK: - Weapon Sound Effects
     
-    public func playLaserSound(pitch: Double = 880.0) {
-        let key = "laser_\(Int(pitch))"
-        playSound(key: key, volume: 0.6) {
-            generateSweepWav(startFreq: pitch, endFreq: 220.0, duration: 0.12, isSawtooth: true)
+    public func playPistolShot() {
+        playSound(key: "gun_pistol", volume: 0.7) {
+            generateGunshotWav(pitch: 700, decay: 0.12)
         }
     }
     
-    public func playPlasmaSound() {
-        playSound(key: "plasma", volume: 0.75) {
-            generateSweepWav(startFreq: 440.0, endFreq: 90.0, duration: 0.22, isSawtooth: false)
+    public func playShotgunShot() {
+        playSound(key: "gun_shotgun", volume: 0.95) {
+            generateHeavyGunshotWav(duration: 0.28)
         }
     }
     
-    public func playTeslaSound() {
-        playSound(key: "tesla", volume: 0.6) {
-            generateNoiseWav(duration: 0.18, isElectric: true)
+    public func playRifleShot() {
+        playSound(key: "gun_rifle", volume: 0.75) {
+            generateGunshotWav(pitch: 550, decay: 0.09)
         }
     }
     
-    public func playExplosionSound(isBig: Bool = false) {
-        let key = isBig ? "explosion_big" : "explosion_small"
-        playSound(key: key, volume: isBig ? 0.9 : 0.6) {
-            generateNoiseWav(duration: isBig ? 0.45 : 0.25, isElectric: false)
+    public func playMinigunShot() {
+        playSound(key: "gun_minigun", volume: 0.65) {
+            generateGunshotWav(pitch: 620, decay: 0.06)
         }
     }
     
-    public func playCoinSound() {
-        playSound(key: "coin", volume: 0.5) {
-            generateSweepWav(startFreq: 987.77, endFreq: 1318.51, duration: 0.08, isSawtooth: false)
+    public func playFlamethrower() {
+        playSound(key: "flamethrower", volume: 0.5) {
+            generateNoiseWav(duration: 0.2, isFire: true)
         }
     }
     
-    public func playPowerupSound() {
-        playSound(key: "powerup", volume: 0.7) {
-            generateArpeggioWav(notes: [440.0, 554.37, 659.25, 880.0], noteDuration: 0.06)
+    public func playTeslaShot() {
+        playSound(key: "gun_tesla", volume: 0.65) {
+            generateNoiseWav(duration: 0.15, isFire: false)
         }
     }
     
-    public func playLevelUpSound() {
-        playSound(key: "levelup", volume: 0.8) {
-            generateArpeggioWav(notes: [523.25, 659.25, 783.99, 1046.50], noteDuration: 0.09)
+    public func playReloadSound() {
+        playSound(key: "reload_click", volume: 0.65) {
+            generateReloadWav()
         }
     }
     
-    public func playBossAlarm() {
-        playSound(key: "boss_alarm", volume: 0.85) {
-            generateSweepWav(startFreq: 400.0, endFreq: 800.0, duration: 0.35, isSawtooth: true)
+    public func playEmptyGunClick() {
+        playSound(key: "empty_click", volume: 0.5) {
+            generateToneWav(freq: 900, duration: 0.04)
         }
     }
     
-    public func playPlayerHitSound() {
-        playSound(key: "player_hit", volume: 0.75) {
-            generateSweepWav(startFreq: 260.0, endFreq: 80.0, duration: 0.16, isSawtooth: false)
+    // MARK: - Zombie & Game Audio
+    
+    public func playZombieGrowl() {
+        playSound(key: "zombie_growl", volume: 0.55) {
+            generateZombieGrowlWav(pitch: 140, duration: 0.4)
         }
     }
     
-    // MARK: - In-Memory WAV Synthesizer
-    
-    private func generateSweepWav(startFreq: Double, endFreq: Double, duration: Double, isSawtooth: Bool) -> Data {
-        return buildWav(duration: duration, sampleRate: 22050) { t in
-            let progress = t / duration
-            let freq = startFreq + (endFreq - startFreq) * progress
-            let phase = 2.0 * Double.pi * freq * t
-            let sample: Float = isSawtooth ? Float((phase / Double.pi).truncatingRemainder(dividingBy: 2.0) - 1.0) : Float(sin(phase))
-            let envelope = Float(1.0 - progress)
-            return sample * envelope
+    public func playZombieDeath() {
+        playSound(key: "zombie_death", volume: 0.6) {
+            generateZombieSplatWav()
         }
     }
     
-    private func generateNoiseWav(duration: Double, isElectric: Bool) -> Data {
+    public func playZombieBite() {
+        playSound(key: "zombie_bite", volume: 0.8) {
+            generateToneSweepWav(startFreq: 280, endFreq: 90, duration: 0.18)
+        }
+    }
+    
+    public func playBossRoar() {
+        playSound(key: "boss_roar", volume: 1.0) {
+            generateZombieGrowlWav(pitch: 70, duration: 0.9)
+        }
+    }
+    
+    public func playExplosionSound() {
+        playSound(key: "explosion_boom", volume: 0.95) {
+            generateHeavyExplosionWav(duration: 0.45)
+        }
+    }
+    
+    public func playMedkitPick() {
+        playSound(key: "pick_medkit", volume: 0.7) {
+            generateArpeggioWav(notes: [440, 554, 659, 880], duration: 0.06)
+        }
+    }
+    
+    public func playAmmoPick() {
+        playSound(key: "pick_ammo", volume: 0.65) {
+            generateArpeggioWav(notes: [600, 800, 1000], duration: 0.05)
+        }
+    }
+    
+    // MARK: - In-Memory Sound Synthesizers
+    
+    private func generateGunshotWav(pitch: Double, decay: Double) -> Data {
+        return buildWav(duration: decay, sampleRate: 22050) { t in
+            let progress = t / decay
+            let noise = Float.random(in: -1.0...1.0)
+            let tone = Float(sin(2.0 * Double.pi * pitch * (1.0 - progress) * t))
+            let mix = (noise * 0.7) + (tone * 0.3)
+            let env = Float(pow(1.0 - progress, 2.5))
+            return mix * env
+        }
+    }
+    
+    private func generateHeavyGunshotWav(duration: Double) -> Data {
         var lastVal: Float = 0.0
         return buildWav(duration: duration, sampleRate: 22050) { t in
             let progress = t / duration
             let raw = Float.random(in: -1.0...1.0)
-            let filtered: Float = isElectric ? (raw - lastVal) * 0.7 : (lastVal * 0.85 + raw * 0.15)
+            let filtered = (lastVal * 0.7) + (raw * 0.3)
             lastVal = filtered
-            let envelope = Float(1.0 - sqrt(progress))
-            return filtered * envelope
+            let sub = Float(sin(2.0 * Double.pi * 90.0 * t))
+            let mix = (filtered * 0.7) + (sub * 0.4)
+            let env = Float(pow(1.0 - progress, 2.0))
+            return mix * env
         }
     }
     
-    private func generateArpeggioWav(notes: [Double], noteDuration: Double) -> Data {
-        let totalDuration = Double(notes.count) * noteDuration
-        return buildWav(duration: totalDuration, sampleRate: 22050) { t in
-            let noteIndex = min(notes.count - 1, Int(t / noteDuration))
-            let noteTime = t - (Double(noteIndex) * noteDuration)
-            let freq = notes[noteIndex]
-            let phase = 2.0 * Double.pi * freq * noteTime
-            let sample = Float(sin(phase))
-            let noteProgress = noteTime / noteDuration
-            let envelope = Float(1.0 - noteProgress)
-            return sample * envelope
+    private func generateHeavyExplosionWav(duration: Double) -> Data {
+        var lastVal: Float = 0.0
+        return buildWav(duration: duration, sampleRate: 22050) { t in
+            let progress = t / duration
+            let raw = Float.random(in: -1.0...1.0)
+            let filtered = (lastVal * 0.88) + (raw * 0.12)
+            lastVal = filtered
+            let env = Float(pow(1.0 - progress, 1.4))
+            return filtered * env
+        }
+    }
+    
+    private func generateZombieGrowlWav(pitch: Double, duration: Double) -> Data {
+        return buildWav(duration: duration, sampleRate: 22050) { t in
+            let progress = t / duration
+            let f = pitch + sin(t * 25.0) * 20.0
+            let saw = Float((t * f).truncatingRemainder(dividingBy: 1.0) * 2.0 - 1.0)
+            let noise = Float.random(in: -0.3...0.3)
+            let env = Float(sin(progress * Double.pi))
+            return (saw * 0.7 + noise) * env
+        }
+    }
+    
+    private func generateZombieSplatWav() -> Data {
+        return buildWav(duration: 0.22, sampleRate: 22050) { t in
+            let progress = t / 0.22
+            let noise = Float.random(in: -1.0...1.0)
+            let squish = Float(sin(2.0 * Double.pi * (180.0 - progress * 90.0) * t))
+            let env = Float(pow(1.0 - progress, 2.0))
+            return (noise * 0.5 + squish * 0.5) * env
+        }
+    }
+    
+    private func generateReloadWav() -> Data {
+        return buildWav(duration: 0.35, sampleRate: 22050) { t in
+            var sample: Float = 0.0
+            if (t > 0.04 && t < 0.12) || (t > 0.22 && t < 0.30) {
+                sample = Float.random(in: -0.9...0.9)
+            }
+            return sample
+        }
+    }
+    
+    private func generateToneWav(freq: Double, duration: Double) -> Data {
+        return buildWav(duration: duration, sampleRate: 22050) { t in
+            let progress = t / duration
+            return Float(sin(2.0 * Double.pi * freq * t)) * Float(1.0 - progress)
+        }
+    }
+    
+    private func generateToneSweepWav(startFreq: Double, endFreq: Double, duration: Double) -> Data {
+        return buildWav(duration: duration, sampleRate: 22050) { t in
+            let progress = t / duration
+            let f = startFreq + (endFreq - startFreq) * progress
+            return Float(sin(2.0 * Double.pi * f * t)) * Float(1.0 - progress)
+        }
+    }
+    
+    private func generateNoiseWav(duration: Double, isFire: Bool) -> Data {
+        var lastVal: Float = 0.0
+        return buildWav(duration: duration, sampleRate: 22050) { t in
+            let progress = t / duration
+            let raw = Float.random(in: -1.0...1.0)
+            let filtered = isFire ? ((lastVal * 0.8) + (raw * 0.2)) : ((raw - lastVal) * 0.6)
+            lastVal = filtered
+            return filtered * Float(1.0 - progress * 0.7)
+        }
+    }
+    
+    private func generateArpeggioWav(notes: [Double], duration: Double) -> Data {
+        let total = Double(notes.count) * duration
+        return buildWav(duration: total, sampleRate: 22050) { t in
+            let idx = min(notes.count - 1, Int(t / duration))
+            let noteTime = t - Double(idx) * duration
+            let f = notes[idx]
+            let env = Float(1.0 - (noteTime / duration))
+            return Float(sin(2.0 * Double.pi * f * noteTime)) * env
         }
     }
     
@@ -166,12 +269,9 @@ public final class AudioManager: ObservableObject {
         var data = Data()
         data.reserveCapacity(44 + Int(dataSize))
         
-        // RIFF Header
         data.append(contentsOf: "RIFF".utf8)
         data.append(contentsOf: withUnsafeBytes(of: chunkSize.littleEndian) { Array($0) })
         data.append(contentsOf: "WAVE".utf8)
-        
-        // fmt chunk
         data.append(contentsOf: "fmt ".utf8)
         let subchunk1Size: Int32 = 16
         let audioFormat: Int16 = 1
@@ -183,8 +283,6 @@ public final class AudioManager: ObservableObject {
         data.append(contentsOf: withUnsafeBytes(of: byteRate.littleEndian) { Array($0) })
         data.append(contentsOf: withUnsafeBytes(of: blockAlign.littleEndian) { Array($0) })
         data.append(contentsOf: withUnsafeBytes(of: bitsPerSample.littleEndian) { Array($0) })
-        
-        // data chunk
         data.append(contentsOf: "data".utf8)
         data.append(contentsOf: withUnsafeBytes(of: dataSize.littleEndian) { Array($0) })
         
@@ -194,7 +292,6 @@ public final class AudioManager: ObservableObject {
             let sampleInt = Int16(sampleVal * 32767.0)
             data.append(contentsOf: withUnsafeBytes(of: sampleInt.littleEndian) { Array($0) })
         }
-        
         return data
     }
 }

@@ -1,32 +1,32 @@
 import Foundation
 
-/// Handles persistent local storage of player currency, upgrades, high scores, and settings
+/// Handles persistent local storage of player currency, weapons, heroes, and settings
 public final class PersistenceManager {
     public static let shared = PersistenceManager()
     
     private let defaults = UserDefaults.standard
     
     private enum Keys {
-        static let crystals = "cyber_crystals_key"
+        static let cash = "zombie_cash_key"
         static let highScore = "high_score_key"
         static let highestWave = "highest_wave_key"
-        static let selectedShip = "selected_ship_id_key"
-        static let theme = "selected_theme_key"
+        static let selectedWeapon = "selected_weapon_id_key"
+        static let selectedHero = "selected_hero_id_key"
         static let sound = "sound_enabled_key"
         static let haptics = "haptics_enabled_key"
         static let fps120 = "fps120_enabled_key"
-        static let upgrades = "permanent_upgrades_json_key"
-        static let ships = "available_ships_json_key"
+        static let weapons = "weapons_json_key"
+        static let heroes = "heroes_json_key"
     }
     
     private init() {}
     
-    // MARK: - Crystals
+    // MARK: - Cash / Crystals
     public func saveCrystals(_ amount: Int) {
-        defaults.set(amount, forKey: Keys.crystals)
+        defaults.set(amount, forKey: Keys.cash)
     }
     public func loadCrystals() -> Int {
-        defaults.integer(forKey: Keys.crystals)
+        defaults.integer(forKey: Keys.cash)
     }
     
     // MARK: - High Scores
@@ -45,25 +45,22 @@ public final class PersistenceManager {
         return wave > 0 ? wave : 1
     }
     
-    // MARK: - Selected Ship
-    public func saveSelectedShip(_ shipId: String) {
-        defaults.set(shipId, forKey: Keys.selectedShip)
+    // MARK: - Selected Weapon & Hero
+    public func saveSelectedWeapon(_ weaponId: String) {
+        defaults.set(weaponId, forKey: Keys.selectedWeapon)
     }
-    public func loadSelectedShip() -> String {
-        defaults.string(forKey: Keys.selectedShip) ?? "striker"
-    }
-    
-    // MARK: - Theme & Settings
-    public func saveTheme(_ theme: ThemePalette) {
-        defaults.set(theme.rawValue, forKey: Keys.theme)
-    }
-    public func loadTheme() -> ThemePalette {
-        if let raw = defaults.string(forKey: Keys.theme), let theme = ThemePalette(rawValue: raw) {
-            return theme
-        }
-        return .cyberNeon
+    public func loadSelectedWeapon() -> String {
+        defaults.string(forKey: Keys.selectedWeapon) ?? "pistol"
     }
     
+    public func saveSelectedHero(_ heroId: String) {
+        defaults.set(heroId, forKey: Keys.selectedHero)
+    }
+    public func loadSelectedHero() -> String {
+        defaults.string(forKey: Keys.selectedHero) ?? "specops"
+    }
+    
+    // MARK: - Settings
     public func saveSoundSetting(_ enabled: Bool) {
         defaults.set(enabled, forKey: Keys.sound)
     }
@@ -88,29 +85,29 @@ public final class PersistenceManager {
         return defaults.bool(forKey: Keys.fps120)
     }
     
-    // MARK: - Ships Persistence
-    public func saveShips(_ ships: [ShipModel]) {
-        if let encoded = try? JSONEncoder().encode(ships) {
-            defaults.set(encoded, forKey: Keys.ships)
+    // MARK: - Weapons Persistence
+    public func saveWeapons(_ weapons: [WeaponModel]) {
+        if let encoded = try? JSONEncoder().encode(weapons) {
+            defaults.set(encoded, forKey: Keys.weapons)
         }
     }
-    public func loadShips(fallback: [ShipModel]) -> [ShipModel] {
-        guard let data = defaults.data(forKey: Keys.ships),
-              let decoded = try? JSONDecoder().decode([ShipModel].self, from: data) else {
+    public func loadWeapons(fallback: [WeaponModel]) -> [WeaponModel] {
+        guard let data = defaults.data(forKey: Keys.weapons),
+              let decoded = try? JSONDecoder().decode([WeaponModel].self, from: data) else {
             return fallback
         }
         return decoded
     }
     
-    // MARK: - Upgrades Persistence
-    public func saveUpgrades(_ upgrades: [UpgradeItem]) {
-        if let encoded = try? JSONEncoder().encode(upgrades) {
-            defaults.set(encoded, forKey: Keys.upgrades)
+    // MARK: - Heroes Persistence
+    public func saveHeroes(_ heroes: [HeroModel]) {
+        if let encoded = try? JSONEncoder().encode(heroes) {
+            defaults.set(encoded, forKey: Keys.heroes)
         }
     }
-    public func loadUpgrades(fallback: [UpgradeItem]) -> [UpgradeItem] {
-        guard let data = defaults.data(forKey: Keys.upgrades),
-              let decoded = try? JSONDecoder().decode([UpgradeItem].self, from: data) else {
+    public func loadHeroes(fallback: [HeroModel]) -> [HeroModel] {
+        guard let data = defaults.data(forKey: Keys.heroes),
+              let decoded = try? JSONDecoder().decode([HeroModel].self, from: data) else {
             return fallback
         }
         return decoded

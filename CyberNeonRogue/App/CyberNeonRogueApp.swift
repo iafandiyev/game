@@ -4,7 +4,7 @@ import SwiftUI
 struct CyberNeonRogueApp: App {
     var body: some Scene {
         WindowGroup {
-            MainMenuView()
+            ZombieMainMenuView()
                 .preferredColorScheme(.dark)
         }
     }
