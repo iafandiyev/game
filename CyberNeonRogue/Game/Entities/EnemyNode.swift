@@ -70,7 +70,7 @@ public final class EnemyNode: SKNode {
             self.expAmount = 25.0
             self.isBoss = false
             
-        case .boss(let name, let baseHp):
+        case .boss(_, let baseHp):
             self.maxHealth = baseHp * CGFloat(waveFactor)
             self.moveSpeed = 50
             self.scoreValue = 2000

@@ -74,8 +74,8 @@ public final class AudioManager: ObservableObject {
     /// Plays an explosion sound with low noise burst
     public func playExplosionSound(isBig: Bool = false) {
         guard soundEnabled else { return }
-        let duration = isBig ? 0.45 : 0.25
-        let vol = (isBig ? sfxVolume * 0.9 : sfxVolume * 0.6)
+        let duration: Double = isBig ? 0.45 : 0.25
+        let vol: Float = isBig ? (sfxVolume * 0.9) : (sfxVolume * 0.6)
         playNoiseBurst(duration: duration, volume: vol, isElectric: false)
     }
     
@@ -132,48 +132,54 @@ public final class AudioManager: ObservableObject {
         case sine, square, sawtooth, triangle
     }
     
+    private func generateWaveSample(type: WaveType, phase: Double) -> Float {
+        switch type {
+        case .sine:
+            return Float(sin(phase))
+        case .square:
+            return sin(phase) >= 0.0 ? 1.0 : -1.0
+        case .sawtooth:
+            let v = (phase / Double.pi).truncatingRemainder(dividingBy: 2.0) - 1.0
+            return Float(v)
+        case .triangle:
+            let norm = (phase / (2.0 * Double.pi)).truncatingRemainder(dividingBy: 1.0)
+            let v = 2.0 * abs(2.0 * (norm - floor(norm + 0.5))) - 1.0
+            return Float(v)
+        }
+    }
+    
     private func playToneSweep(startFreq: Double, endFreq: Double, duration: Double, volume: Float, waveType: WaveType) {
         ensureEngineRunning()
         guard let engine = audioEngine else { return }
         
         var currentPhase: Double = 0.0
-        let totalSamples = Int(sampleRate * duration)
-        var sampleIndex = 0
+        let totalSamples: Int = Int(sampleRate * duration)
+        var sampleIndex: Int = 0
         
         let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
-        let sourceNode = AVAudioSourceNode { _, _, frameCount, audioBufferList -> OSStatus in
+        let sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
+            guard let self = self else { return noErr }
             let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
             guard let buffer = ablPointer.first, let data = buffer.mData?.assumingMemoryBound(to: Float.self) else {
                 return noErr
             }
             
-            for frame in 0..<Int(frameCount) {
+            let frameLimit = Int(frameCount)
+            for frame in 0..<frameLimit {
                 if sampleIndex >= totalSamples {
                     data[frame] = 0.0
                 } else {
                     let progress = Double(sampleIndex) / Double(totalSamples)
                     let currentFreq = startFreq + (endFreq - startFreq) * progress
-                    let phaseIncrement = (2.0 * .pi * currentFreq) / self.sampleRate
+                    let phaseIncrement = (2.0 * Double.pi * currentFreq) / self.sampleRate
                     
-                    var sampleVal: Float = 0.0
-                    switch waveType {
-                    case .sine:
-                        sampleVal = Float(sin(currentPhase))
-                    case .square:
-                        sampleVal = sin(currentPhase) >= 0 ? 1.0 : -1.0
-                    case .sawtooth:
-                        sampleVal = Float((currentPhase / .pi).truncatingRemainder(dividingBy: 2.0) - 1.0)
-                    case .triangle:
-                        let norm = (currentPhase / (2.0 * .pi)).truncatingRemainder(dividingBy: 1.0)
-                        sampleVal = Float(2.0 * abs(2.0 * (norm - floor(norm + 0.5))) - 1.0)
-                    }
-                    
+                    let sampleVal = self.generateWaveSample(type: waveType, phase: currentPhase)
                     let envelope = Float(1.0 - progress)
                     data[frame] = sampleVal * envelope * volume
                     
                     currentPhase += phaseIncrement
-                    if currentPhase >= 2.0 * .pi {
-                        currentPhase -= 2.0 * .pi
+                    if currentPhase >= (2.0 * Double.pi) {
+                        currentPhase -= (2.0 * Double.pi)
                     }
                     sampleIndex += 1
                 }
@@ -194,8 +200,8 @@ public final class AudioManager: ObservableObject {
         ensureEngineRunning()
         guard let engine = audioEngine else { return }
         
-        let totalSamples = Int(sampleRate * duration)
-        var sampleIndex = 0
+        let totalSamples: Int = Int(sampleRate * duration)
+        var sampleIndex: Int = 0
         var lastNoise: Float = 0.0
         
         let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
@@ -205,7 +211,8 @@ public final class AudioManager: ObservableObject {
                 return noErr
             }
             
-            for frame in 0..<Int(frameCount) {
+            let frameLimit = Int(frameCount)
+            for frame in 0..<frameLimit {
                 if sampleIndex >= totalSamples {
                     data[frame] = 0.0
                 } else {
@@ -220,7 +227,7 @@ public final class AudioManager: ObservableObject {
                     }
                     lastNoise = filtered
                     
-                    let envelope = Float(1.0 - pow(progress, 0.5))
+                    let envelope = Float(1.0 - sqrt(progress))
                     data[frame] = filtered * envelope * volume
                     sampleIndex += 1
                 }

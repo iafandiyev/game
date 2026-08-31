@@ -262,7 +262,7 @@ public struct GameContainerView: View {
                 
                 // Level-Up Upgrade Modal
                 if gameState.isLevelingUp {
-                    UpgradeModalView(gameState: gameState) { selectedPerk in
+                    UpgradeModalView(gameState: gameState, activePerks: scene?.player?.activePerks ?? [:]) { selectedPerk in
                         applyPerk(selectedPerk)
                         gameState.isLevelingUp = false
                         gameState.isPaused = false

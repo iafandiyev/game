@@ -3,9 +3,16 @@ import SwiftUI
 public struct UpgradeModalView: View {
     @ObservedObject var gameState: GameState
     let onPerkSelected: (InGamePerk) -> Void
+    public var activePerks: [String: Int]
     
     @State private var availablePerks: [InGamePerk] = []
     @State private var appearAnimation = false
+    
+    public init(gameState: GameState, activePerks: [String: Int] = [:], onPerkSelected: @escaping (InGamePerk) -> Void) {
+        self.gameState = gameState
+        self.activePerks = activePerks
+        self.onPerkSelected = onPerkSelected
+    }
     
     public var body: some View {
         ZStack {
@@ -99,8 +106,8 @@ public struct UpgradeModalView: View {
             }
         }
         .onAppear {
-            let activePerks = (gameState.selectedShipId.isEmpty ? [:] : [:]) // Current scene perks
-            self.availablePerks = UpgradeSystem.shared.getRandomPerks(activePerks: activePerks)
+            let perksMap: [String: Int] = activePerks
+            self.availablePerks = UpgradeSystem.shared.getRandomPerks(activePerks: perksMap)
             
             withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
                 appearAnimation = true
