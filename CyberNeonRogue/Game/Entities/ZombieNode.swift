@@ -21,55 +21,58 @@ public final class ZombieNode: SKNode {
     // Status Effects
     public var burnTimer: TimeInterval = 0
     public var burnDamagePerSec: CGFloat = 0
-    public var spitCooldown: TimeInterval = 2.5
+    public var spitCooldown: TimeInterval = 2.4
     public var spitTimer: TimeInterval = 0
     
-    // Nodes
-    private var bodyNode: SKShapeNode?
+    // Visual Nodes
+    private var shadowNode: SKShapeNode?
+    private var bodyContainer: SKNode = SKNode()
+    private var torsoNode: SKShapeNode?
     private var headNode: SKShapeNode?
     private var leftArm: SKShapeNode?
     private var rightArm: SKShapeNode?
     private var healthBarFg: SKShapeNode?
+    private var toxicSacs: [SKShapeNode] = []
     
     private var walkAnimTimer: CGFloat = CGFloat.random(in: 0...5)
     
     public init(type: ZombieType, wave: Int) {
         self.zombieType = type
-        let waveMultiplier = 1.0 + (CGFloat(wave - 1) * 0.16)
+        let waveMultiplier = 1.0 + (CGFloat(wave - 1) * 0.18)
         
         switch type {
         case .walker:
-            self.maxHealth = 45 * waveMultiplier
+            self.maxHealth = 48 * waveMultiplier
             self.moveSpeed = 75 + CGFloat(wave * 2)
-            self.damage = 15
+            self.damage = 16
             self.cashValue = 15
             self.isBoss = false
             
         case .runner:
-            self.maxHealth = 30 * waveMultiplier
-            self.moveSpeed = 160 + CGFloat(wave * 3)
-            self.damage = 10
+            self.maxHealth = 32 * waveMultiplier
+            self.moveSpeed = 165 + CGFloat(wave * 3)
+            self.damage = 12
             self.cashValue = 25
             self.isBoss = false
             
         case .acidSpitter:
-            self.maxHealth = 60 * waveMultiplier
+            self.maxHealth = 65 * waveMultiplier
             self.moveSpeed = 65
-            self.damage = 20
+            self.damage = 22
             self.cashValue = 40
             self.isBoss = false
             
         case .boomer:
-            self.maxHealth = 90 * waveMultiplier
+            self.maxHealth = 100 * waveMultiplier
             self.moveSpeed = 55
-            self.damage = 45 // Explodes
+            self.damage = 50
             self.cashValue = 50
             self.isBoss = false
             
         case .abominationBoss(_, let baseHp):
             self.maxHealth = baseHp * waveMultiplier
-            self.moveSpeed = 60
-            self.damage = 35
+            self.moveSpeed = 65
+            self.damage = 38
             self.cashValue = 500
             self.isBoss = true
         }
@@ -77,7 +80,7 @@ public final class ZombieNode: SKNode {
         self.currentHealth = self.maxHealth
         super.init()
         
-        setupAppearance()
+        setupHighDetailAppearance()
         setupPhysics()
         setupHealthBar()
     }
@@ -86,51 +89,116 @@ public final class ZombieNode: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupAppearance() {
-        let sizeScale: CGFloat = isBoss ? 2.4 : (caseBoomer ? 1.4 : 1.0)
+    // MARK: - AAA Appearance Setup
+    
+    private func setupHighDetailAppearance() {
+        self.zPosition = isBoss ? 12 : 9
+        let scale: CGFloat = isBoss ? 2.5 : (caseBoomer ? 1.4 : 1.0)
         
-        // Torso / Body
-        let body = SKShapeNode(circleOfRadius: 14 * sizeScale)
-        body.fillColor = getSkinColor()
-        body.strokeColor = SKColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0)
-        body.lineWidth = 1.5
-        addChild(body)
-        self.bodyNode = body
+        // 1. Soft Dynamic Shadow
+        let shadow = SKShapeNode(ellipseOf: CGSize(width: 32 * scale, height: 20 * scale))
+        shadow.fillColor = SKColor.black.withAlphaComponent(0.35)
+        shadow.strokeColor = .clear
+        shadow.position = CGPoint(x: 0, y: -4)
+        shadow.zPosition = -1
+        addChild(shadow)
+        self.shadowNode = shadow
         
-        // Tattered clothes / blood spots
-        let shirt = SKShapeNode(rectOf: CGSize(width: 16 * sizeScale, height: 12 * sizeScale), cornerRadius: 2)
-        shirt.fillColor = isBoss ? SKColor.darkGray : (caseRunner ? SKColor.red : SKColor(red: 0.3, green: 0.35, blue: 0.3, alpha: 1.0))
-        shirt.strokeColor = .clear
-        body.addChild(shirt)
+        // 2. Body Container
+        addChild(bodyContainer)
         
-        // Arms reaching forward
-        let lArm = SKShapeNode(rectOf: CGSize(width: 14 * sizeScale, height: 4 * sizeScale), cornerRadius: 1)
-        lArm.fillColor = getSkinColor()
-        lArm.strokeColor = .black
-        lArm.position = CGPoint(x: 14 * sizeScale, y: -6 * sizeScale)
-        body.addChild(lArm)
-        self.leftArm = lArm
+        // Torso / Rotten Flesh Body
+        let torso = SKShapeNode(rectOf: CGSize(width: 22 * scale, height: 24 * scale), cornerRadius: 5 * scale)
+        torso.fillColor = getSkinColor()
+        torso.strokeColor = SKColor(red: 0.08, green: 0.1, blue: 0.08, alpha: 1.0)
+        torso.lineWidth = 1.2
+        bodyContainer.addChild(torso)
+        self.torsoNode = torso
         
-        let rArm = SKShapeNode(rectOf: CGSize(width: 14 * sizeScale, height: 4 * sizeScale), cornerRadius: 1)
-        rArm.fillColor = getSkinColor()
-        rArm.strokeColor = .black
-        rArm.position = CGPoint(x: 14 * sizeScale, y: 6 * sizeScale)
-        body.addChild(rArm)
-        self.rightArm = rArm
+        // Tattered Clothes / Bloody Wounds
+        let shirt = SKShapeNode(rectOf: CGSize(width: 18 * scale, height: 16 * scale), cornerRadius: 3 * scale)
+        shirt.fillColor = isBoss ? SKColor(red: 0.15, green: 0.15, blue: 0.18, alpha: 1.0) : (caseRunner ? SKColor(red: 0.55, green: 0.1, blue: 0.1, alpha: 1.0) : SKColor(red: 0.22, green: 0.26, blue: 0.24, alpha: 1.0))
+        shirt.strokeColor = .black
+        shirt.lineWidth = 0.5
+        torso.addChild(shirt)
         
-        // Head with hollow glowing eyes
-        let head = SKShapeNode(circleOfRadius: 8 * sizeScale)
+        // Flesh Wounds / Exposed Ribs
+        let wound = SKShapeNode(rectOf: CGSize(width: 8 * scale, height: 4 * scale), cornerRadius: 1 * scale)
+        wound.fillColor = SKColor(red: 0.7, green: 0.05, blue: 0.05, alpha: 0.9)
+        wound.strokeColor = .clear
+        wound.position = CGPoint(x: -2 * scale, y: -2 * scale)
+        torso.addChild(wound)
+        
+        // Toxic Glowing Sacs on Acid Spitter & Boomer
+        if caseSpitter || caseBoomer {
+            for i in 0..<3 {
+                let sac = SKShapeNode(circleOfRadius: CGFloat.random(in: 4...7) * scale)
+                sac.fillColor = caseSpitter ? SKColor(red: 0.1, green: 1.0, blue: 0.1, alpha: 0.85) : SKColor(red: 1.0, green: 0.4, blue: 0.0, alpha: 0.85)
+                sac.strokeColor = .white
+                sac.lineWidth = 0.5
+                sac.glowWidth = 3.0
+                sac.blendMode = .add
+                sac.position = CGPoint(x: CGFloat(i * 6 - 6) * scale, y: -10 * scale)
+                bodyContainer.addChild(sac)
+                toxicSacs.append(sac)
+            }
+        }
+        
+        // Head with rotting jaws and glowing eyes
+        let head = SKShapeNode(circleOfRadius: 10 * scale)
         head.fillColor = getSkinColor()
         head.strokeColor = .black
-        head.position = CGPoint(x: 2 * sizeScale, y: 0)
-        body.addChild(head)
+        head.lineWidth = 1.2
+        head.position = CGPoint(x: 4 * scale, y: 0)
+        bodyContainer.addChild(head)
         self.headNode = head
         
-        let eye = SKShapeNode(circleOfRadius: 2 * sizeScale)
-        eye.fillColor = isBoss ? .yellow : (caseSpitter ? .green : .red)
-        eye.strokeColor = .clear
-        eye.position = CGPoint(x: 5 * sizeScale, y: 2 * sizeScale)
-        head.addChild(eye)
+        // Glowing Eyes
+        let lEye = SKShapeNode(circleOfRadius: 2.2 * scale)
+        lEye.fillColor = isBoss ? .yellow : (caseSpitter ? .green : .red)
+        lEye.strokeColor = .white
+        lEye.glowWidth = 3.0
+        lEye.blendMode = .add
+        lEye.position = CGPoint(x: 5 * scale, y: -3.5 * scale)
+        head.addChild(lEye)
+        
+        let rEye = SKShapeNode(circleOfRadius: 2.2 * scale)
+        rEye.fillColor = isBoss ? .yellow : (caseSpitter ? .green : .red)
+        rEye.strokeColor = .white
+        rEye.glowWidth = 3.0
+        rEye.blendMode = .add
+        rEye.position = CGPoint(x: 5 * scale, y: 3.5 * scale)
+        head.addChild(rEye)
+        
+        // Rotten Reaching Claws / Arms
+        let lArm = SKShapeNode(rectOf: CGSize(width: 18 * scale, height: 5 * scale), cornerRadius: 2 * scale)
+        lArm.fillColor = getSkinColor()
+        lArm.strokeColor = .black
+        lArm.lineWidth = 1.0
+        lArm.position = CGPoint(x: 16 * scale, y: -10 * scale)
+        bodyContainer.addChild(lArm)
+        self.leftArm = lArm
+        
+        let rArm = SKShapeNode(rectOf: CGSize(width: 18 * scale, height: 5 * scale), cornerRadius: 2 * scale)
+        rArm.fillColor = getSkinColor()
+        rArm.strokeColor = .black
+        rArm.lineWidth = 1.0
+        rArm.position = CGPoint(x: 16 * scale, y: 10 * scale)
+        bodyContainer.addChild(rArm)
+        self.rightArm = rArm
+        
+        // Sharp Claws
+        let lClaw = SKShapeNode(circleOfRadius: 2 * scale)
+        lClaw.fillColor = .white
+        lClaw.strokeColor = .black
+        lClaw.position = CGPoint(x: 8 * scale, y: 0)
+        lArm.addChild(lClaw)
+        
+        let rClaw = SKShapeNode(circleOfRadius: 2 * scale)
+        rClaw.fillColor = .white
+        rClaw.strokeColor = .black
+        rClaw.position = CGPoint(x: 8 * scale, y: 0)
+        rArm.addChild(rClaw)
     }
     
     private var caseBoomer: Bool {
@@ -150,16 +218,16 @@ public final class ZombieNode: SKNode {
     
     private func getSkinColor() -> SKColor {
         switch zombieType {
-        case .walker: return SKColor(red: 0.35, green: 0.45, blue: 0.35, alpha: 1.0)
-        case .runner: return SKColor(red: 0.45, green: 0.3, blue: 0.3, alpha: 1.0)
-        case .acidSpitter: return SKColor(red: 0.2, green: 0.55, blue: 0.2, alpha: 1.0)
-        case .boomer: return SKColor(red: 0.4, green: 0.48, blue: 0.25, alpha: 1.0)
-        case .abominationBoss: return SKColor(red: 0.5, green: 0.2, blue: 0.2, alpha: 1.0)
+        case .walker: return SKColor(red: 0.32, green: 0.44, blue: 0.32, alpha: 1.0)
+        case .runner: return SKColor(red: 0.48, green: 0.28, blue: 0.28, alpha: 1.0)
+        case .acidSpitter: return SKColor(red: 0.18, green: 0.52, blue: 0.20, alpha: 1.0)
+        case .boomer: return SKColor(red: 0.42, green: 0.48, blue: 0.24, alpha: 1.0)
+        case .abominationBoss: return SKColor(red: 0.48, green: 0.16, blue: 0.16, alpha: 1.0)
         }
     }
     
     private func setupPhysics() {
-        let radius: CGFloat = isBoss ? 38 : (caseBoomer ? 20 : 16)
+        let radius: CGFloat = isBoss ? 42 : (caseBoomer ? 22 : 17)
         let body = SKPhysicsBody(circleOfRadius: radius)
         body.isDynamic = true
         body.affectedByGravity = false
@@ -171,44 +239,49 @@ public final class ZombieNode: SKNode {
     }
     
     private func setupHealthBar() {
-        guard isBoss || maxHealth > 70 else { return }
+        guard isBoss || maxHealth > 60 else { return }
         
-        let width: CGFloat = isBoss ? 80 : 32
-        let yOffset: CGFloat = isBoss ? 55 : 24
+        let width: CGFloat = isBoss ? 90 : 36
+        let yOffset: CGFloat = isBoss ? 62 : 28
         
-        let bg = SKShapeNode(rectOf: CGSize(width: width, height: 4), cornerRadius: 1.5)
-        bg.fillColor = SKColor.black.withAlphaComponent(0.6)
-        bg.strokeColor = .gray
+        let bg = SKShapeNode(rectOf: CGSize(width: width, height: 5), cornerRadius: 2)
+        bg.fillColor = SKColor.black.withAlphaComponent(0.7)
+        bg.strokeColor = SKColor.white.withAlphaComponent(0.2)
         bg.lineWidth = 0.5
         bg.position = CGPoint(x: 0, y: yOffset)
+        bg.zPosition = 25
         addChild(bg)
         
-        let fg = SKShapeNode(rectOf: CGSize(width: width, height: 4), cornerRadius: 1.5)
+        let fg = SKShapeNode(rectOf: CGSize(width: width, height: 5), cornerRadius: 2)
         fg.fillColor = isBoss ? .red : .green
         fg.strokeColor = .clear
         fg.position = CGPoint(x: 0, y: yOffset)
+        fg.zPosition = 26
         addChild(fg)
         self.healthBarFg = fg
     }
     
     public func updateHealthBar() {
         guard let fg = healthBarFg else { return }
-        let width: CGFloat = isBoss ? 80 : 32
+        let width: CGFloat = isBoss ? 90 : 36
         let ratio = max(0.0, min(1.0, currentHealth / maxHealth))
         let newWidth = width * ratio
-        fg.path = CGPath(roundedRect: CGRect(x: -width/2, y: -2, width: newWidth, height: 4), cornerWidth: 1.5, cornerHeight: 1.5, transform: nil)
+        fg.path = CGPath(roundedRect: CGRect(x: -width/2, y: -2.5, width: newWidth, height: 5), cornerWidth: 2, cornerHeight: 2, transform: nil)
     }
     
     public func takeDamage(_ amount: CGFloat, knockbackAngle: CGFloat = 0, knockbackForce: CGFloat = 0) -> Bool {
         currentHealth -= amount
         updateHealthBar()
         
-        // Flash red/white hit reaction
-        bodyNode?.fillColor = .white
-        bodyNode?.run(SKAction.sequence([
+        // Hit flash reaction
+        torsoNode?.fillColor = .white
+        headNode?.fillColor = .white
+        
+        torsoNode?.run(SKAction.sequence([
             SKAction.wait(forDuration: 0.05),
             SKAction.run { [weak self] in
-                self?.bodyNode?.fillColor = self?.getSkinColor() ?? .green
+                self?.torsoNode?.fillColor = self?.getSkinColor() ?? .green
+                self?.headNode?.fillColor = self?.getSkinColor() ?? .green
             }
         ]))
         
@@ -225,7 +298,7 @@ public final class ZombieNode: SKNode {
     public func applyBurn(duration: TimeInterval, dps: CGFloat) {
         burnTimer = duration
         burnDamagePerSec = dps
-        bodyNode?.fillColor = .orange
+        torsoNode?.fillColor = .orange
     }
     
     // MARK: - AI Update
@@ -243,21 +316,21 @@ public final class ZombieNode: SKNode {
         let dist = sqrt(dx * dx + dy * dy)
         let angle = atan2(dy, dx)
         
-        self.bodyNode?.zRotation = angle
+        self.bodyContainer.zRotation = angle
         
-        // Arm swinging animation
-        walkAnimTimer += CGFloat(dt) * 10.0
-        leftArm?.position.x = 14 + sin(walkAnimTimer) * 4
-        rightArm?.position.x = 14 - sin(walkAnimTimer) * 4
+        // Claw swinging animation
+        walkAnimTimer += CGFloat(dt) * (caseRunner ? 18.0 : 10.0)
+        let scale: CGFloat = isBoss ? 2.5 : 1.0
+        leftArm?.position.x = (16 + sin(walkAnimTimer) * 5) * scale
+        rightArm?.position.x = (16 - sin(walkAnimTimer) * 5) * scale
         
         // Spitter behavior
         if case .acidSpitter = zombieType {
             spitTimer += dt
-            if dist > 200 {
+            if dist > 210 {
                 self.position.x += cos(angle) * moveSpeed * CGFloat(dt)
                 self.position.y += sin(angle) * moveSpeed * CGFloat(dt)
             } else if dist < 120 {
-                // Back up slightly
                 self.position.x -= cos(angle) * moveSpeed * CGFloat(dt)
                 self.position.y -= sin(angle) * moveSpeed * CGFloat(dt)
             }
