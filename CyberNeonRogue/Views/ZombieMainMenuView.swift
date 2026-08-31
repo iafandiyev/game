@@ -1,5 +1,14 @@
 import SwiftUI
 
+public struct ScaleButtonStyle: ButtonStyle {
+    public init() {}
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
+            .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
 public struct ZombieMainMenuView: View {
     @StateObject private var gameState = ZombieGameState.shared
     
