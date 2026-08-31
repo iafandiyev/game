@@ -147,8 +147,30 @@ public final class GameState: ObservableObject {
     @Published public var isLevelingUp: Bool = false
     @Published public var runKills: Int = 0
     
+    public static let fallbackShip = ShipModel(
+        id: "striker",
+        name: "Cyber Striker",
+        description: "Balanslaşdırılmış sürətli qırıcı. Qoşa Lazer topları ilə təchiz olunub.",
+        iconName: "bolt.fill",
+        baseSpeed: 320,
+        baseHealth: 100,
+        baseShield: 50,
+        baseDamage: 25,
+        baseFireRate: 0.28,
+        price: 0,
+        isUnlocked: true,
+        primaryWeapon: .laser,
+        accentColorHex: "#00F0FF"
+    )
+    
     public var selectedShip: ShipModel {
-        availableShips.first(where: { $0.id == selectedShipId }) ?? availableShips[0]
+        if let ship = availableShips.first(where: { $0.id == selectedShipId }) {
+            return ship
+        }
+        if let first = availableShips.first {
+            return first
+        }
+        return GameState.fallbackShip
     }
     
     private init() {

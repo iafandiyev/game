@@ -300,7 +300,11 @@ public struct GameContainerView: View {
     }
     
     private func setupScene(size: CGSize) {
-        let sc = GameScene(size: size)
+        let actualSize = CGSize(
+            width: size.width > 0 ? size.width : UIScreen.main.bounds.width,
+            height: size.height > 0 ? size.height : UIScreen.main.bounds.height
+        )
+        let sc = GameScene(size: actualSize)
         sc.scaleMode = .resizeFill
         sc.gameState = gameState
         self.scene = sc

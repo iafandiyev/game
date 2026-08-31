@@ -1,22 +1,21 @@
 import Foundation
 import AVFoundation
+import UIKit
 
-/// Real-time procedural audio synthesizer for dynamic sound effects and ambient synth music
+/// High-reliability procedural audio synthesizer using AVAudioPlayer and in-memory PCM buffers
 public final class AudioManager: ObservableObject {
     public static let shared = AudioManager()
-    
-    private var audioEngine: AVAudioEngine?
-    private var isEngineRunning = false
-    private let sampleRate: Double = 44100.0
     
     // Volume controls
     public var soundEnabled: Bool = true
     public var sfxVolume: Float = 0.8
     public var musicVolume: Float = 0.6
     
+    private var activePlayers: [AVAudioPlayer] = []
+    private var cachedSounds: [String: Data] = [:]
+    
     private init() {
         setupAudioSession()
-        setupEngine()
     }
     
     private func setupAudioSession() {
@@ -29,218 +28,173 @@ public final class AudioManager: ObservableObject {
         }
     }
     
-    private func setupEngine() {
-        let engine = AVAudioEngine()
-        self.audioEngine = engine
+    private func playSound(key: String, volume: Float = 0.7, generator: () -> Data) {
+        guard soundEnabled else { return }
         
-        do {
-            try engine.start()
-            isEngineRunning = true
-        } catch {
-            print("Audio engine start failed: \(error.localizedDescription)")
+        let data: Data
+        if let cached = cachedSounds[key] {
+            data = cached
+        } else {
+            data = generator()
+            cachedSounds[key] = data
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            do {
+                let player = try AVAudioPlayer(data: data)
+                player.volume = min(1.0, max(0.0, volume * self.sfxVolume))
+                player.prepareToPlay()
+                player.play()
+                
+                self.activePlayers.append(player)
+                if self.activePlayers.count > 20 {
+                    self.activePlayers.removeAll(where: { !$0.isPlaying })
+                }
+            } catch {
+                print("Sound playback error: \(error)")
+            }
         }
     }
     
-    private func ensureEngineRunning() {
-        guard let engine = audioEngine, !engine.isRunning else { return }
-        do {
-            try engine.start()
-            isEngineRunning = true
-        } catch {
-            print("Audio engine restart failed: \(error.localizedDescription)")
-        }
-    }
+    // MARK: - SFX Triggers
     
-    // MARK: - Procedural SFX Generators
-    
-    /// Plays a synthesized laser blast sound with descending frequency
     public func playLaserSound(pitch: Double = 880.0) {
-        guard soundEnabled else { return }
-        playToneSweep(startFreq: pitch, endFreq: 220.0, duration: 0.12, volume: sfxVolume * 0.5, waveType: .sawtooth)
+        let key = "laser_\(Int(pitch))"
+        playSound(key: key, volume: 0.6) {
+            generateSweepWav(startFreq: pitch, endFreq: 220.0, duration: 0.12, isSawtooth: true)
+        }
     }
     
-    /// Plays a synthesized plasma shot sound (heavy deep frequency sweep)
     public func playPlasmaSound() {
-        guard soundEnabled else { return }
-        playToneSweep(startFreq: 440.0, endFreq: 90.0, duration: 0.22, volume: sfxVolume * 0.6, waveType: .square)
+        playSound(key: "plasma", volume: 0.75) {
+            generateSweepWav(startFreq: 440.0, endFreq: 90.0, duration: 0.22, isSawtooth: false)
+        }
     }
     
-    /// Plays an electric tesla arc crackle sound
     public func playTeslaSound() {
-        guard soundEnabled else { return }
-        playNoiseBurst(duration: 0.18, volume: sfxVolume * 0.45, isElectric: true)
+        playSound(key: "tesla", volume: 0.6) {
+            generateNoiseWav(duration: 0.18, isElectric: true)
+        }
     }
     
-    /// Plays an explosion sound with low noise burst
     public func playExplosionSound(isBig: Bool = false) {
-        guard soundEnabled else { return }
-        let duration: Double = isBig ? 0.45 : 0.25
-        let vol: Float = isBig ? (sfxVolume * 0.9) : (sfxVolume * 0.6)
-        playNoiseBurst(duration: duration, volume: vol, isElectric: false)
-    }
-    
-    /// Plays a pleasant arpeggio chime for level-up / perk unlock
-    public func playLevelUpSound() {
-        guard soundEnabled else { return }
-        let notes: [Double] = [523.25, 659.25, 783.99, 1046.50] // C5, E5, G5, C6
-        for (index, freq) in notes.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.08) { [weak self] in
-                guard let self = self else { return }
-                self.playToneSweep(startFreq: freq, endFreq: freq * 1.05, duration: 0.15, volume: self.sfxVolume * 0.7, waveType: .sine)
-            }
+        let key = isBig ? "explosion_big" : "explosion_small"
+        playSound(key: key, volume: isBig ? 0.9 : 0.6) {
+            generateNoiseWav(duration: isBig ? 0.45 : 0.25, isElectric: false)
         }
     }
     
-    /// Plays a crystal/coin pickup chime
     public func playCoinSound() {
-        guard soundEnabled else { return }
-        playToneSweep(startFreq: 987.77, endFreq: 1318.51, duration: 0.08, volume: sfxVolume * 0.4, waveType: .sine)
+        playSound(key: "coin", volume: 0.5) {
+            generateSweepWav(startFreq: 987.77, endFreq: 1318.51, duration: 0.08, isSawtooth: false)
+        }
     }
     
-    /// Plays a powerup acquired sound
     public func playPowerupSound() {
-        guard soundEnabled else { return }
-        let notes: [Double] = [440.0, 554.37, 659.25, 880.0]
-        for (i, note) in notes.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.05) { [weak self] in
-                guard let self = self else { return }
-                self.playToneSweep(startFreq: note, endFreq: note, duration: 0.1, volume: self.sfxVolume * 0.6, waveType: .triangle)
-            }
+        playSound(key: "powerup", volume: 0.7) {
+            generateArpeggioWav(notes: [440.0, 554.37, 659.25, 880.0], noteDuration: 0.06)
         }
     }
     
-    /// Plays a boss warning siren alarm
+    public func playLevelUpSound() {
+        playSound(key: "levelup", volume: 0.8) {
+            generateArpeggioWav(notes: [523.25, 659.25, 783.99, 1046.50], noteDuration: 0.09)
+        }
+    }
+    
     public func playBossAlarm() {
-        guard soundEnabled else { return }
-        for i in 0..<3 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.3) { [weak self] in
-                guard let self = self else { return }
-                self.playToneSweep(startFreq: 400.0, endFreq: 800.0, duration: 0.22, volume: self.sfxVolume * 0.8, waveType: .sawtooth)
-            }
+        playSound(key: "boss_alarm", volume: 0.85) {
+            generateSweepWav(startFreq: 400.0, endFreq: 800.0, duration: 0.35, isSawtooth: true)
         }
     }
     
-    /// Plays player damage / shield hit sound
     public func playPlayerHitSound() {
-        guard soundEnabled else { return }
-        playToneSweep(startFreq: 280.0, endFreq: 70.0, duration: 0.15, volume: sfxVolume * 0.7, waveType: .square)
-    }
-    
-    // MARK: - Low Level Synthesis Implementation
-    
-    private enum WaveType {
-        case sine, square, sawtooth, triangle
-    }
-    
-    private func generateWaveSample(type: WaveType, phase: Double) -> Float {
-        switch type {
-        case .sine:
-            return Float(sin(phase))
-        case .square:
-            return sin(phase) >= 0.0 ? 1.0 : -1.0
-        case .sawtooth:
-            let v = (phase / Double.pi).truncatingRemainder(dividingBy: 2.0) - 1.0
-            return Float(v)
-        case .triangle:
-            let norm = (phase / (2.0 * Double.pi)).truncatingRemainder(dividingBy: 1.0)
-            let v = 2.0 * abs(2.0 * (norm - floor(norm + 0.5))) - 1.0
-            return Float(v)
+        playSound(key: "player_hit", volume: 0.75) {
+            generateSweepWav(startFreq: 260.0, endFreq: 80.0, duration: 0.16, isSawtooth: false)
         }
     }
     
-    private func playToneSweep(startFreq: Double, endFreq: Double, duration: Double, volume: Float, waveType: WaveType) {
-        ensureEngineRunning()
-        guard let engine = audioEngine else { return }
-        
-        var currentPhase: Double = 0.0
-        let totalSamples: Int = Int(sampleRate * duration)
-        var sampleIndex: Int = 0
-        
-        let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
-        let sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
-            guard let self = self else { return noErr }
-            let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
-            guard let buffer = ablPointer.first, let data = buffer.mData?.assumingMemoryBound(to: Float.self) else {
-                return noErr
-            }
-            
-            let frameLimit = Int(frameCount)
-            for frame in 0..<frameLimit {
-                if sampleIndex >= totalSamples {
-                    data[frame] = 0.0
-                } else {
-                    let progress = Double(sampleIndex) / Double(totalSamples)
-                    let currentFreq = startFreq + (endFreq - startFreq) * progress
-                    let phaseIncrement = (2.0 * Double.pi * currentFreq) / self.sampleRate
-                    
-                    let sampleVal = self.generateWaveSample(type: waveType, phase: currentPhase)
-                    let envelope = Float(1.0 - progress)
-                    data[frame] = sampleVal * envelope * volume
-                    
-                    currentPhase += phaseIncrement
-                    if currentPhase >= (2.0 * Double.pi) {
-                        currentPhase -= (2.0 * Double.pi)
-                    }
-                    sampleIndex += 1
-                }
-            }
-            return noErr
-        }
-        
-        engine.attach(sourceNode)
-        engine.connect(sourceNode, to: engine.mainMixerNode, format: format)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.05) {
-            engine.disconnectNodeOutput(sourceNode)
-            engine.detach(sourceNode)
+    // MARK: - In-Memory WAV Synthesizer
+    
+    private func generateSweepWav(startFreq: Double, endFreq: Double, duration: Double, isSawtooth: Bool) -> Data {
+        return buildWav(duration: duration, sampleRate: 22050) { t in
+            let progress = t / duration
+            let freq = startFreq + (endFreq - startFreq) * progress
+            let phase = 2.0 * Double.pi * freq * t
+            let sample: Float = isSawtooth ? Float((phase / Double.pi).truncatingRemainder(dividingBy: 2.0) - 1.0) : Float(sin(phase))
+            let envelope = Float(1.0 - progress)
+            return sample * envelope
         }
     }
     
-    private func playNoiseBurst(duration: Double, volume: Float, isElectric: Bool) {
-        ensureEngineRunning()
-        guard let engine = audioEngine else { return }
+    private func generateNoiseWav(duration: Double, isElectric: Bool) -> Data {
+        var lastVal: Float = 0.0
+        return buildWav(duration: duration, sampleRate: 22050) { t in
+            let progress = t / duration
+            let raw = Float.random(in: -1.0...1.0)
+            let filtered: Float = isElectric ? (raw - lastVal) * 0.7 : (lastVal * 0.85 + raw * 0.15)
+            lastVal = filtered
+            let envelope = Float(1.0 - sqrt(progress))
+            return filtered * envelope
+        }
+    }
+    
+    private func generateArpeggioWav(notes: [Double], noteDuration: Double) -> Data {
+        let totalDuration = Double(notes.count) * noteDuration
+        return buildWav(duration: totalDuration, sampleRate: 22050) { t in
+            let noteIndex = min(notes.count - 1, Int(t / noteDuration))
+            let noteTime = t - (Double(noteIndex) * noteDuration)
+            let freq = notes[noteIndex]
+            let phase = 2.0 * Double.pi * freq * noteTime
+            let sample = Float(sin(phase))
+            let noteProgress = noteTime / noteDuration
+            let envelope = Float(1.0 - noteProgress)
+            return sample * envelope
+        }
+    }
+    
+    private func buildWav(duration: Double, sampleRate: Int, generator: (Double) -> Float) -> Data {
+        let numSamples = Int(Double(sampleRate) * duration)
+        let numChannels: Int16 = 1
+        let bitsPerSample: Int16 = 16
+        let byteRate = Int32(sampleRate * Int(numChannels) * Int(bitsPerSample / 8))
+        let blockAlign = Int16(numChannels * (bitsPerSample / 8))
+        let dataSize = Int32(numSamples * 2)
+        let chunkSize = 36 + dataSize
         
-        let totalSamples: Int = Int(sampleRate * duration)
-        var sampleIndex: Int = 0
-        var lastNoise: Float = 0.0
+        var data = Data()
+        data.reserveCapacity(44 + Int(dataSize))
         
-        let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
-        let sourceNode = AVAudioSourceNode { _, _, frameCount, audioBufferList -> OSStatus in
-            let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
-            guard let buffer = ablPointer.first, let data = buffer.mData?.assumingMemoryBound(to: Float.self) else {
-                return noErr
-            }
-            
-            let frameLimit = Int(frameCount)
-            for frame in 0..<frameLimit {
-                if sampleIndex >= totalSamples {
-                    data[frame] = 0.0
-                } else {
-                    let progress = Double(sampleIndex) / Double(totalSamples)
-                    let rawNoise = Float.random(in: -1.0...1.0)
-                    
-                    let filtered: Float
-                    if isElectric {
-                        filtered = (rawNoise - lastNoise) * 0.7
-                    } else {
-                        filtered = (lastNoise * 0.85) + (rawNoise * 0.15)
-                    }
-                    lastNoise = filtered
-                    
-                    let envelope = Float(1.0 - sqrt(progress))
-                    data[frame] = filtered * envelope * volume
-                    sampleIndex += 1
-                }
-            }
-            return noErr
+        // RIFF Header
+        data.append(contentsOf: "RIFF".utf8)
+        data.append(contentsOf: withUnsafeBytes(of: chunkSize.littleEndian) { Array($0) })
+        data.append(contentsOf: "WAVE".utf8)
+        
+        // fmt chunk
+        data.append(contentsOf: "fmt ".utf8)
+        let subchunk1Size: Int32 = 16
+        let audioFormat: Int16 = 1
+        data.append(contentsOf: withUnsafeBytes(of: subchunk1Size.littleEndian) { Array($0) })
+        data.append(contentsOf: withUnsafeBytes(of: audioFormat.littleEndian) { Array($0) })
+        data.append(contentsOf: withUnsafeBytes(of: numChannels.littleEndian) { Array($0) })
+        let sr = Int32(sampleRate)
+        data.append(contentsOf: withUnsafeBytes(of: sr.littleEndian) { Array($0) })
+        data.append(contentsOf: withUnsafeBytes(of: byteRate.littleEndian) { Array($0) })
+        data.append(contentsOf: withUnsafeBytes(of: blockAlign.littleEndian) { Array($0) })
+        data.append(contentsOf: withUnsafeBytes(of: bitsPerSample.littleEndian) { Array($0) })
+        
+        // data chunk
+        data.append(contentsOf: "data".utf8)
+        data.append(contentsOf: withUnsafeBytes(of: dataSize.littleEndian) { Array($0) })
+        
+        for i in 0..<numSamples {
+            let t = Double(i) / Double(sampleRate)
+            let sampleVal = max(-1.0, min(1.0, generator(t)))
+            let sampleInt = Int16(sampleVal * 32767.0)
+            data.append(contentsOf: withUnsafeBytes(of: sampleInt.littleEndian) { Array($0) })
         }
         
-        engine.attach(sourceNode)
-        engine.connect(sourceNode, to: engine.mainMixerNode, format: format)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.05) {
-            engine.disconnectNodeOutput(sourceNode)
-            engine.detach(sourceNode)
-        }
+        return data
     }
 }

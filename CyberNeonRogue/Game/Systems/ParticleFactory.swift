@@ -12,13 +12,9 @@ public final class ParticleFactory {
         let size = CGSize(width: 16, height: 16)
         let renderer = UIGraphicsImageRenderer(size: size)
         let image = renderer.image { ctx in
-            let context = ctx.cgContext
-            let center = CGPoint(x: 8, y: 8)
-            let colors = [UIColor.white.cgColor, UIColor.cyan.withAlphaComponent(0.6).cgColor, UIColor.clear.cgColor] as CFArray
-            let locations: [CGFloat] = [0.0, 0.4, 1.0]
-            if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: locations) {
-                context.drawRadialGradient(gradient, startCenter: center, startRadius: 0, endCenter: center, endRadius: 8, options: [])
-            }
+            let rect = CGRect(x: 2, y: 2, width: 12, height: 12)
+            UIColor.white.setFill()
+            ctx.cgContext.fillEllipse(in: rect)
         }
         let texture = SKTexture(image: image)
         _sparkTexture = texture
